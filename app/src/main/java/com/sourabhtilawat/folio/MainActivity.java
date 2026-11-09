@@ -58,6 +58,7 @@ public class MainActivity extends Activity {
     private static final int PICK_FILES = 41;
 
     private WebView web;
+    private ProBilling billing;
     private ValueCallback<Uri[]> fileCallback;
     private boolean pageReady = false;
     private final List<Uri> incoming = new ArrayList<>();
@@ -155,6 +156,10 @@ public class MainActivity extends Activity {
         });
 
         web.addJavascriptInterface(new Bridge(), "FolioAndroid");
+        billing = new ProBilling(this, json -> runOnUiThread(() -> {
+            if (web != null) web.evaluateJavascript("window.folioPro&&window.folioPro(" + json + ")", null);
+        }));
+        web.addJavascriptInterface(billing.bridge, "FolioBilling");
 
         if (Build.VERSION.SDK_INT < 29 && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 7);
@@ -163,6 +168,18 @@ public class MainActivity extends Activity {
         takeIncoming(getIntent());
         if (state != null) web.restoreState(state);
         else web.loadUrl(BASE + "index.html");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (billing != null) billing.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (billing != null) billing.destroy();
+        super.onDestroy();
     }
 
     @Override

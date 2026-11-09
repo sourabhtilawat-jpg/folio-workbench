@@ -11,8 +11,8 @@ android {
         applicationId 'com.sourabhtilawat.folio'
         minSdk 24
         targetSdk 36
-        versionCode 3
-        versionName '1.1.0'
+        versionCode 4
+        versionName '1.2.0'
     }
 
     buildTypes {
@@ -29,4 +29,9 @@ android {
     androidResources {
         noCompress += ['gz', 'woff2', 'png', 'wasm']
     }
+}
+
+dependencies {
+    // Google Play Billing (Folio Pro one-time unlock). Play requires version 8 or newer.
+    implementation 'com.android.billingclient:billing:8.0.0'
 }

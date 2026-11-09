@@ -385,6 +385,18 @@ kbd{font-family:var(--f-mono);font-size:11px;padding:2px 6px;border-radius:6px;b
 .chatbar input{flex:1;min-width:0;height:42px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 
 /* overlays */
+.tag.pro{background:linear-gradient(135deg,#f5b544,#e07b1a);color:#1b1206}
+.tb-pro{height:40px;padding:0 14px;border-radius:12px;border:0;font-weight:700;font-size:13px;letter-spacing:.02em;background:linear-gradient(135deg,#f5b544,#e07b1a);color:#1b1206;box-shadow:var(--shadow-1)}
+.tb-pro.owned{background:var(--surface);color:var(--ink);border:1px solid var(--line);font-weight:600}
+.pro-modal{width:min(520px,100%)}
+.pro-why{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#f5b544 16%,transparent);font-weight:500}
+.pro-list{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:10px}
+.pro-list li{display:flex;gap:10px;align-items:flex-start;line-height:1.35}
+.pro-list li::before{content:"✓";flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--accent-soft);color:var(--accent)}
+.pro-acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.pro-acts .run{flex:1 1 100%;margin:0}
+.pro-fine{margin:14px 0 0;color:var(--muted);font-size:12.5px;line-height:1.45}
+.run .pro-lock{font-family:var(--f-mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,0,0,.18)}
 .overlay{position:fixed;inset:0;z-index:40;background:color-mix(in srgb,#05080F 45%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;justify-content:center;align-items:flex-start;padding:max(9vh,calc(env(safe-area-inset-top,0px) + 20px)) max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));animation:fade .2s ease;overflow:auto}
 @keyframes fade{from{opacity:0}}
 .pal,.modal{width:min(660px,100%);background:var(--surface);border:1px solid var(--line);border-radius:22px;box-shadow:0 40px 90px -24px rgba(0,0,0,.55);overflow:hidden;animation:pop .28s var(--ease)}
@@ -444,6 +456,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);display
     <span class="tb-credit">by <b>Sourabh Tilawat</b></span>
     <div class="tb-actions">
       <button class="tb-search" id="openPalette" type="button" aria-label="Search tools"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search tools</span><kbd id="kbdHint">Ctrl K</kbd></button>
+      <button class="tb-pro" id="proBtn" type="button" hidden>Get Pro</button>
       <button class="tb-icon" id="themeBtn" type="button" hidden aria-label="Switch theme"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
     </div>
   </div>
@@ -453,7 +466,7 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);display
   <main id="shelfWrap">
     <section class="hero">
       <div class="hero-top">
-        <p class="eyebrow"><span><b id="toolCount">42</b> tools</span><span>Free forever</span><span>No sign-up</span><span>No watermark</span></p>
+        <p class="eyebrow"><span><b id="toolCount">42</b> tools</span><span id="freeTag">Free forever</span><span>No sign-up</span><span>No watermark</span></p>
         <h1>Every PDF tool on <span class="hl">one workbench</span>.</h1>
         <p class="lede" id="lede">Merge, compress, convert, edit, sign, redact and OCR your documents in one calm place. Free, unlimited, batch-ready and Hindi-friendly.</p>
       </div>
@@ -532,6 +545,25 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);display
     <div id="pickAllWrap"><span class="lbl">More tools for this file</span><div class="pick-row" id="pickAll"></div></div>
   </div>
 </div>
+<div class="overlay" id="proModal" hidden>
+  <div class="modal pro-modal" role="dialog" aria-modal="true" aria-labelledby="proTitle">
+    <div class="modal-head"><span class="mh-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span><div><h3 id="proTitle">Folio Pro</h3><p id="proSub">One-time payment. Yours for life.</p></div><button class="iconbtn" id="proClose" type="button" aria-label="Close">×</button></div>
+    <p class="pro-why" id="proWhy" hidden></p>
+    <ul class="pro-list">
+      <li><span><b>Batch processing</b>: compress, convert, sign or watermark many files at once</span></li>
+      <li><span><b>OCR</b>: make scanned PDFs searchable, in English and Hindi</span></li>
+      <li><span><b>Redact</b>: black out private text for good</span></li>
+      <li><span><b>Compare</b>: see what changed between two PDFs</span></li>
+      <li><span>Every Pro tool added in future updates</span></li>
+    </ul>
+    <div class="pro-acts">
+      <button class="run" id="proBuy" type="button"><span id="proBuyT">Unlock Pro</span></button>
+      <button class="small" id="proRestore" type="button">Restore purchase</button>
+      <button class="small" id="proLater" type="button">Not now</button>
+    </div>
+    <p class="pro-fine">Paid once through Google Play. No subscription, no ads, no account. All other tools stay free.</p>
+  </div>
+</div>
 <div class="actionbar" id="actionbar" hidden><button class="run" id="runMirror" type="button"></button></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -550,6 +582,12 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">"
 const tick = () => new Promise(r=>setTimeout(r,0));
 /* set by the Android / Windows app builds: {offline:true, shell:"android"|"windows"} */
 const ENV = window.FOLIO_ENV || {};
+/* ---------- Folio Pro (Android only, Google Play Billing) ---------- */
+const PRO={on:!!window.FolioBilling,owned:false,price:"",tools:["ocr","redact","compare"]};
+if(PRO.on){ try{ PRO.owned=!!FolioBilling.isPro(); PRO.price=FolioBilling.price()||""; }catch(e){} }
+const proTool=t=>PRO.on&&!PRO.owned&&PRO.tools.includes(t.id);
+const proNeeded=t=>!!t&&PRO.on&&!PRO.owned&&(PRO.tools.includes(t.id)||(!!t.batch&&typeof items!=="undefined"&&items.length>1));
+
 const absUrl = p => new URL(p,location.href).href;
 if(ENV.shell){ const pv=document.getElementById("privText"); if(pv) pv.innerHTML="<b>Your files never leave your device.</b> Every tool runs inside this app, even with no internet connection."; const ld=document.getElementById("lede"); if(ld) ld.textContent="Merge, compress, convert, edit, sign, redact and OCR your documents in one calm place. Free, unlimited, batch-ready, Hindi-friendly and fully offline."; }
 const store = {
@@ -1309,7 +1347,7 @@ $("palIn").placeholder=`Search ${TOOLS.length} tools…`;
 const KEYWORDS={watermark:"stamp hindi",numbers:"header footer hindi",txt2pdf:"hindi",word2pdf:"docx doc hindi",ocr:"scan searchable hindi tesseract",edit:"annotate whiteout text hindi",protect:"password encrypt lock",unlock:"password decrypt",compress:"reduce shrink size smaller",img2pdf:"jpg png photo scan camera",bookmarks:"outline toc table of contents",imgx:"photos pictures",sign:"signature autograph initials esign drag",redact:"hide blackout private"};
 const toolText=t=>(t.name+" "+t.desc+" "+t.code+" "+GROUPS[t.g]+" "+(KEYWORDS[t.id]||"")+(t.batch?" batch bulk":"")).toLowerCase();
 const matchTool=(t,q)=>!q||q.split(/\s+/).every(w=>toolText(t).includes(w));
-const badges=t=>(t.ai===true?`<span class="tag">AI</span>`:t.ai==="both"?`<span class="tag soft">AI + ON-DEVICE</span>`:"")+(t.batch?`<span class="tag soft">BATCH</span>`:"");
+const badges=t=>(proTool(t)?`<span class="tag pro">PRO</span>`:"")+(t.ai===true?`<span class="tag">AI</span>`:t.ai==="both"?`<span class="tag soft">AI + ON-DEVICE</span>`:"")+(t.batch?`<span class="tag soft">BATCH</span>`:"");
 const sheetHtml=(t,cls)=>`<span class="sheet${cls?" "+cls:""}" style="${gc(t.g)}"><span>${t.code}</span></span>`;
 let CAT=-1;
 function drawTabs(){
@@ -1425,7 +1463,7 @@ function renderFiles(){
   const need=cur.max===2?"Add two files.":cur.multi?(cur.min>1?"Add two or more files.":"Add one or more files."):cur.batch?"No file yet. You can add several.":"No file yet.";
   $("fileEmpty").textContent=items.length?"":(cur.optional?"Optional. You can paste content in Options instead.":need);
   $("filesHead").textContent=items.length>1?`Files · ${items.length}`:"Files";
-  if(!running){ const label=(cur.batch&&items.length>1?`${cur.btn} · ${items.length} files`:cur.btn)||"Run"; $("run").innerHTML=`<span>${esc(label)}</span><span class="arrow" aria-hidden="true">→</span>`; }
+  if(!running){ const label=(cur.batch&&items.length>1?`${cur.btn} · ${items.length} files`:cur.btn)||"Run"; $("run").innerHTML=`<span>${esc(label)}</span>${proNeeded(cur)?`<span class="pro-lock">PRO</span>`:""}<span class="arrow" aria-hidden="true">→</span>`; }
   $("run").disabled=running||(!cur.optional&&(!items.length||items.length<(cur.min||1)||items.some(x=>x.bad)));
   if($("results").hidden) setStep(items.length||cur.optional?2:1);
   syncBar();
@@ -1822,7 +1860,7 @@ function setBusy(b){
   syncBar();
 }
 $("run").onclick=async()=>{
-  const t=cur; if(running||!t) return; $("err").hidden=true; $("results").hidden=true; closePV();
+  const t=cur; if(running||!t) return; if(proNeeded(t)){ openPro(PRO.tools.includes(t.id)?`${t.name} is part of Folio Pro.`:`Processing ${items.length} files at once is part of Folio Pro. One file at a time stays free.`); return; } $("err").hidden=true; $("results").hidden=true; closePV();
   if(t.plain){ const enc=items.find(x=>x.enc); if(enc){ showErr(`${enc.file.name} is password-protected. Open it with Unlock PDF first, then come back.`); return; } }
   running=true; setBusy(true); $("prog").hidden=false;
   const p=(m,f)=>{ $("progT").textContent=m; const v=Math.round(Math.min(1,f||0)*100); $("barI").style.width=v+"%"; $("progPct").textContent=v+"%"; };
@@ -1907,7 +1945,7 @@ $("results").addEventListener("click",async e=>{
 const NARROW=matchMedia("(max-width: 900px)");
 new IntersectionObserver(([en])=>{ runVisible=en.isIntersecting; syncBar(); }).observe($("run"));
 function syncBar(){
-  const r=$("run"), bar=$("actionbar"), show=!!cur&&!$("bench").hidden&&!r.hidden&&!runVisible&&NARROW.matches&&$("pickModal").hidden;
+  const r=$("run"), bar=$("actionbar"), show=!!cur&&!$("bench").hidden&&!r.hidden&&!runVisible&&NARROW.matches&&$("pickModal").hidden&&$("proModal").hidden;
   bar.hidden=!show; document.body.classList.toggle("has-bar",show);
   if(show){ const m=$("runMirror"); m.innerHTML=r.innerHTML; m.disabled=r.disabled; m.classList.toggle("busy",r.classList.contains("busy")); }
 }
@@ -1979,6 +2017,37 @@ window.folioIncoming=async list=>{
   if(location.hash.length>1) location.hash="";
   setTimeout(()=>showPicker(files),60);
 };
+
+/* ---------- Folio Pro UI ---------- */
+function proUI(){
+  const b=$("proBtn"); if(b){ b.hidden=!PRO.on; b.textContent=PRO.owned?"Pro ✓":"Get Pro"; b.classList.toggle("owned",PRO.owned); }
+  const ft=$("freeTag"); if(ft&&PRO.on) ft.textContent=PRO.owned?"Pro unlocked":"Free core tools";
+  $("proBuyT").textContent=PRO.owned?"Pro is unlocked":PRO.price?`Unlock for ${PRO.price}`:"Unlock Pro";
+  $("proBuy").disabled=PRO.owned;
+}
+function openPro(why){
+  if(!PRO.on) return;
+  const w=$("proWhy"); w.hidden=!why; w.textContent=why||"";
+  proUI(); $("proModal").hidden=false; syncBar();
+  try{ FolioBilling.refresh(); }catch(e){}
+}
+function closePro(){ $("proModal").hidden=true; syncBar(); }
+window.folioPro=s=>{
+  if(!s) return; if(typeof s==="string"){ try{ s=JSON.parse(s); }catch(e){ return; } }
+  const was=PRO.owned; if("owned" in s) PRO.owned=!!s.owned; if(s.price) PRO.price=s.price;
+  if(s.event==="purchased"&&PRO.owned){ closePro(); toast("Folio Pro unlocked. Thank you!","ok"); }
+  else if(s.event==="restored") toast(PRO.owned?"Purchase restored. Pro is unlocked.":"No Pro purchase found on this Google account.",PRO.owned?"ok":undefined);
+  else if(s.event==="pending") toast("Payment pending. Pro unlocks as soon as Google confirms it.");
+  else if(s.event==="error"&&s.message) toast(s.message);
+  proUI(); if(was!==PRO.owned){ drawShelf($("find").value); if(cur) renderFiles(); }
+};
+$("proBtn").onclick=()=>openPro("");
+$("proClose").onclick=closePro; $("proLater").onclick=closePro;
+$("proModal").addEventListener("click",e=>{ if(e.target.id==="proModal") closePro(); });
+$("proBuy").onclick=()=>{ if(PRO.owned) return; try{ FolioBilling.buy(); }catch(e){ toast("Google Play isn't available right now. Try again in a moment."); } };
+$("proRestore").onclick=()=>{ try{ FolioBilling.restore(); toast("Checking your purchases…"); }catch(e){} };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!$("proModal").hidden) closePro(); });
+proUI();
 
 route(); booted=true;
 })();
