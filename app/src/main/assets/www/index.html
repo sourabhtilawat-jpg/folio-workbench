@@ -386,7 +386,7 @@ kbd{font-family:var(--f-mono);font-size:11px;padding:2px 6px;border-radius:6px;b
 
 /* overlays */
 .tag.pro{background:linear-gradient(135deg,#f5b544,#e07b1a);color:#1b1206}
-.tb-pro{height:40px;padding:0 14px;border-radius:12px;border:0;font-weight:700;font-size:13px;letter-spacing:.02em;background:linear-gradient(135deg,#f5b544,#e07b1a);color:#1b1206;box-shadow:var(--shadow-1)}
+.tb-pro{height:40px;white-space:nowrap;padding:0 14px;border-radius:12px;border:0;font-weight:700;font-size:13px;letter-spacing:.02em;background:linear-gradient(135deg,#f5b544,#e07b1a);color:#1b1206;box-shadow:var(--shadow-1)}
 .tb-pro.owned{background:var(--surface);color:var(--ink);border:1px solid var(--line);font-weight:600}
 .pro-modal{width:min(520px,100%)}
 .pro-why{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,#f5b544 16%,transparent);font-weight:500}
@@ -2021,7 +2021,8 @@ window.folioIncoming=async list=>{
 /* ---------- Folio Pro UI ---------- */
 function proUI(){
   const b=$("proBtn"); if(b){ b.hidden=!PRO.on; b.textContent=PRO.owned?"Pro ✓":"Get Pro"; b.classList.toggle("owned",PRO.owned); }
-  const ft=$("freeTag"); if(ft&&PRO.on) ft.textContent=PRO.owned?"Pro unlocked":"Free core tools";
+  const ft=$("freeTag"); if(ft&&PRO.on) ft.textContent=PRO.owned?"Pro unlocked":"Free + Pro tools";
+  const ld=$("lede"); if(ld&&PRO.on) ld.textContent=PRO.owned?"Merge, compress, convert, edit, sign, redact and OCR your documents in one calm place. Folio Pro is unlocked: every tool, batch processing included, Hindi-friendly and fully offline.":"Merge, compress, convert, edit and sign your documents in one calm place. Most tools are free; Folio Pro (one-time payment) adds batch processing, OCR, Redact and Compare. Hindi-friendly and fully offline.";
   $("proBuyT").textContent=PRO.owned?"Pro is unlocked":PRO.price?`Unlock for ${PRO.price}`:"Unlock Pro";
   $("proBuy").disabled=PRO.owned;
 }

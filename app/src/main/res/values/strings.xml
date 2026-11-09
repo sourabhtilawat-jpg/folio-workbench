@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><resources>
   <string name="app_name">Folio Workbench</string>
   <string name="open_with">Folio Workbench</string>
-  <string name="app_desc">Every PDF tool in one place. Developed by Sourabh Tilawat.</string>
+  <string name="app_desc">PDF tools with free and Pro features. Developed by Sourabh Tilawat.</string>
   <color name="icon_bg">#13202D</color>
 </resources>
