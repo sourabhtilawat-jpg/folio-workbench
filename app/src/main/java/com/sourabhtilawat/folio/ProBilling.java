@@ -66,7 +66,7 @@ public class ProBilling implements PurchasesUpdatedListener {
         return p == null ? "" : p;
     }
 
-    private void notify(String event, String message) {
+    private void sendState(String event, String message) {
         try {
             JSONObject o = new JSONObject();
             o.put("owned", isOwned());
@@ -95,7 +95,7 @@ public class ProBilling implements PurchasesUpdatedListener {
                     checkPurchases(false);
                     if (q != null) q.run();
                 } else if (q != null) {
-                    notify("error", "Google Play isn't available right now. Check your connection and try again.");
+                    sendState("error", "Google Play isn't available right now. Check your connection and try again.");
                 }
             }
 
@@ -119,7 +119,7 @@ public class ProBilling implements PurchasesUpdatedListener {
             ProductDetails.OneTimePurchaseOfferDetails offer = details.getOneTimePurchaseOfferDetails();
             if (offer != null) {
                 prefs.edit().putString("price", offer.getFormattedPrice()).apply();
-                notify(null, null);
+                sendState(null, null);
             }
         });
     }
@@ -130,13 +130,13 @@ public class ProBilling implements PurchasesUpdatedListener {
                 QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(),
                 (result, purchases) -> {
                     if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                        if (userAsked) notify("error", "Couldn't reach Google Play. Try again in a moment.");
+                        if (userAsked) sendState("error", "Couldn't reach Google Play. Try again in a moment.");
                         return;
                     }
                     boolean owned = false;
                     if (purchases != null) for (Purchase p : purchases) if (handle(p)) owned = true;
                     setOwned(owned);
-                    notify(userAsked ? "restored" : null, null);
+                    sendState(userAsked ? "restored" : null, null);
                 });
     }
 
@@ -163,14 +163,14 @@ public class ProBilling implements PurchasesUpdatedListener {
                 if (handle(p)) owned = true;
                 else if (p.getProducts().contains(PRODUCT_ID) && p.getPurchaseState() == Purchase.PurchaseState.PENDING) pending = true;
             }
-            if (owned) { setOwned(true); notify("purchased", null); }
-            else if (pending) notify("pending", null);
+            if (owned) { setOwned(true); sendState("purchased", null); }
+            else if (pending) sendState("pending", null);
         } else if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) {
             checkPurchases(true);
         } else if (code == BillingClient.BillingResponseCode.USER_CANCELED) {
-            notify(null, null);
+            sendState(null, null);
         } else {
-            notify("error", "The purchase didn't go through. You haven't been charged.");
+            sendState("error", "The purchase didn't go through. You haven't been charged.");
         }
     }
 
@@ -178,7 +178,7 @@ public class ProBilling implements PurchasesUpdatedListener {
         final ProductDetails d = details;
         if (d == null) {
             loadDetails();
-            notify("error", "Folio Pro isn't available yet. Please try again shortly.");
+            sendState("error", "Folio Pro isn't available yet. Please try again shortly.");
             return;
         }
         activity.runOnUiThread(() -> {
