@@ -27,7 +27,7 @@ jobs:
       - name: Build release bundle
         run: |
           set -o pipefail
-          gradle --no-daemon --stacktrace :app:bundleRelease 2>&1 | tee build.log
+          gradle --no-daemon --stacktrace :app:bundleRelease :app:assembleRelease 2>&1 | tee build.log
 
       - name: Publish the result to the builds branch
         if: always()
@@ -39,6 +39,8 @@ jobs:
           cp "$GITHUB_WORKSPACE/build.log" . 2>/dev/null || echo "no log" > build.log
           AAB="$GITHUB_WORKSPACE/app/build/outputs/bundle/release/app-release.aab"
           if [ -f "$AAB" ]; then cp "$AAB" app-release-unsigned.aab; echo success > STATUS; else echo failed > STATUS; fi
+          APK="$GITHUB_WORKSPACE/app/build/outputs/apk/release/app-release-unsigned.apk"
+          if [ -f "$APK" ]; then cp "$APK" app-release-unsigned.apk; fi
           echo "$GITHUB_SHA" > COMMIT
           git init -q -b builds
           git config user.name "github-actions[bot]"
