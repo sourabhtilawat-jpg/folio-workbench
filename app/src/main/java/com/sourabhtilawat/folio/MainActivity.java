@@ -59,6 +59,8 @@ public class MainActivity extends Activity {
 
     private WebView web;
     private ProBilling billing;
+    private FolioAds ads;
+    private FrameLayout adSlot;
     private ValueCallback<Uri[]> fileCallback;
     private boolean pageReady = false;
     private final List<Uri> incoming = new ArrayList<>();
@@ -73,9 +75,12 @@ public class MainActivity extends Activity {
         final int bg = night ? 0xFF090E18 : 0xFFEEF1F6;
         web = new WebView(this);
         web.setBackgroundColor(bg);
-        FrameLayout root = new FrameLayout(this);
+        android.widget.LinearLayout root = new android.widget.LinearLayout(this);
+        root.setOrientation(android.widget.LinearLayout.VERTICAL);
         root.setBackgroundColor(bg);
-        root.addView(web, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        root.addView(web, new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        adSlot = new FrameLayout(this);
+        root.addView(adSlot, new android.widget.LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams.MATCH_PARENT, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT));
         setContentView(root);
         edgeToEdge(root, night);
 
@@ -158,8 +163,11 @@ public class MainActivity extends Activity {
         web.addJavascriptInterface(new Bridge(), "FolioAndroid");
         billing = new ProBilling(this, json -> runOnUiThread(() -> {
             if (web != null) web.evaluateJavascript("window.folioPro&&window.folioPro(" + json + ")", null);
+            if (ads != null && billing != null) ads.setPro(billing.isOwned());
         }));
         web.addJavascriptInterface(billing.bridge, "FolioBilling");
+        ads = new FolioAds(this, adSlot, billing.isOwned());
+        web.addJavascriptInterface(ads.bridge, "FolioAds");
 
         if (Build.VERSION.SDK_INT < 29 && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 7);
@@ -174,11 +182,19 @@ public class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         if (billing != null) billing.onResume();
+        if (ads != null) ads.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        if (ads != null) ads.onPause();
+        super.onPause();
     }
 
     @Override
     protected void onDestroy() {
         if (billing != null) billing.destroy();
+        if (ads != null) ads.destroy();
         super.onDestroy();
     }
 

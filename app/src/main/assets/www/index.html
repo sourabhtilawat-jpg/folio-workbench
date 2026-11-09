@@ -550,10 +550,9 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);display
     <div class="modal-head"><span class="mh-ico" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></span><div><h3 id="proTitle">Folio Pro</h3><p id="proSub">One-time payment. Yours for life.</p></div><button class="iconbtn" id="proClose" type="button" aria-label="Close">×</button></div>
     <p class="pro-why" id="proWhy" hidden></p>
     <ul class="pro-list">
-      <li><span><b>Batch processing</b>: compress, convert, sign or watermark many files at once</span></li>
-      <li><span><b>OCR</b>: make scanned PDFs searchable, in English and Hindi</span></li>
-      <li><span><b>Redact</b>: black out private text for good</span></li>
-      <li><span><b>Compare</b>: see what changed between two PDFs</span></li>
+      <li><span><b>No ads</b>, ever</span></li>
+      <li><span><b>9 Pro tools</b>: Extract pages, Resize pages, Repair PDF, Excel to PDF, Extract images, Watermark, Compare PDF, OCR PDF, Protect PDF</span></li>
+      <li><span><b>Batch processing</b>: run any tool on many files at once</span></li>
       <li><span>Every Pro tool added in future updates</span></li>
     </ul>
     <div class="pro-acts">
@@ -561,7 +560,8 @@ footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);display
       <button class="small" id="proRestore" type="button">Restore purchase</button>
       <button class="small" id="proLater" type="button">Not now</button>
     </div>
-    <p class="pro-fine">Paid once through Google Play. No subscription, no ads, no account. All other tools stay free.</p>
+    <p class="pro-fine">Paid once through Google Play. No subscription, no account. The free version shows ads; all other tools stay free.</p>
+    <button class="small" id="adPrivacy" type="button" hidden>Ad privacy choices</button>
   </div>
 </div>
 <div class="actionbar" id="actionbar" hidden><button class="run" id="runMirror" type="button"></button></div>
@@ -583,7 +583,7 @@ const tick = () => new Promise(r=>setTimeout(r,0));
 /* set by the Android / Windows app builds: {offline:true, shell:"android"|"windows"} */
 const ENV = window.FOLIO_ENV || {};
 /* ---------- Folio Pro (Android only, Google Play Billing) ---------- */
-const PRO={on:!!window.FolioBilling,owned:false,price:"",tools:["ocr","redact","compare"]};
+const PRO={on:!!window.FolioBilling,owned:false,price:"",tools:["extract","resize","repair","xls2pdf","imgx","watermark","compare","ocr","protect"]};
 if(PRO.on){ try{ PRO.owned=!!FolioBilling.isPro(); PRO.price=FolioBilling.price()||""; }catch(e){} }
 const proTool=t=>PRO.on&&!PRO.owned&&PRO.tools.includes(t.id);
 const proNeeded=t=>!!t&&PRO.on&&!PRO.owned&&(PRO.tools.includes(t.id)||(!!t.batch&&typeof items!=="undefined"&&items.length>1));
@@ -1891,7 +1891,7 @@ function chainTargets(files){
 }
 const NEXT={merge:["compress","numbers","bookmarks","sign"],compress:["sign","protect","merge","numbers"],img2pdf:["compress","ocr","merge","sign"],word2pdf:["sign","compress","watermark","protect"],xls2pdf:["compress","merge","sign","numbers"],sign:["compress","protect","merge","flatten"],edit:["sign","compress","protect","numbers"],ocr:["compress","pdf2word","sign","merge"],pdf2img:["img2pdf"],_:["compress","sign","watermark","numbers","protect","merge"]};
 let chainFiles=[];
-function showResults(res){
+function showResults(res){ try{ if(window.FolioAds&&!PRO.owned) FolioAds.jobDone(); }catch(e){}
   const f=res.files, el=$("results"); el.className="results";
   if(!f.length){ showErr("Nothing was produced. Check the page selection."); return; }
   const total=f.reduce((s,x)=>s+x.blob.size,0), aiTool=cur&&cur.ai, ch=res.locked?null:chainTargets(f); chainFiles=ch?ch.files:[];
@@ -2022,9 +2022,10 @@ window.folioIncoming=async list=>{
 function proUI(){
   const b=$("proBtn"); if(b){ b.hidden=!PRO.on; b.textContent=PRO.owned?"Pro ✓":"Get Pro"; b.classList.toggle("owned",PRO.owned); }
   const ft=$("freeTag"); if(ft&&PRO.on) ft.textContent=PRO.owned?"Pro unlocked":"Free + Pro tools";
-  const ld=$("lede"); if(ld&&PRO.on) ld.textContent=PRO.owned?"Merge, compress, convert, edit, sign, redact and OCR your documents in one calm place. Folio Pro is unlocked: every tool, batch processing included, Hindi-friendly and fully offline.":"Merge, compress, convert, edit and sign your documents in one calm place. Most tools are free; Folio Pro (one-time payment) adds batch processing, OCR, Redact and Compare. Hindi-friendly and fully offline.";
+  const ld=$("lede"); if(ld&&PRO.on) ld.textContent=PRO.owned?"Merge, compress, convert, edit, sign and OCR your documents in one calm place. Folio Pro is unlocked: every tool, no ads, Hindi-friendly and fully offline.":"Merge, compress, convert, edit and sign your documents in one calm place. Most tools are free with ads; Folio Pro (one-time payment) unlocks 9 more tools and batch processing, and removes ads.";
   $("proBuyT").textContent=PRO.owned?"Pro is unlocked":PRO.price?`Unlock for ${PRO.price}`:"Unlock Pro";
   $("proBuy").disabled=PRO.owned;
+  try{ $("adPrivacy").hidden=!(window.FolioAds&&FolioAds.privacyRequired()); }catch(e){}
 }
 function openPro(why){
   if(!PRO.on) return;
@@ -2046,6 +2047,7 @@ $("proBtn").onclick=()=>openPro("");
 $("proClose").onclick=closePro; $("proLater").onclick=closePro;
 $("proModal").addEventListener("click",e=>{ if(e.target.id==="proModal") closePro(); });
 $("proBuy").onclick=()=>{ if(PRO.owned) return; try{ FolioBilling.buy(); }catch(e){ toast("Google Play isn't available right now. Try again in a moment."); } };
+$("adPrivacy").onclick=()=>{ try{ FolioAds.privacyOptions(); }catch(e){} };
 $("proRestore").onclick=()=>{ try{ FolioBilling.restore(); toast("Checking your purchases…"); }catch(e){} };
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&!$("proModal").hidden) closePro(); });
 proUI();
