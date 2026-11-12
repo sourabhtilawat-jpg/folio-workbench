@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" fill="#13202D"/>
+<path d="M146 92h160l70 70v258H146z" fill="#ECEFF3"/>
+<path d="M306 92v70h70z" fill="#9FB0C4"/>
+<rect x="182" y="300" width="160" height="34" fill="#F2D21B"/>
+<text x="186" y="292" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="150" fill="#2346D8">F</text>
+</svg>
